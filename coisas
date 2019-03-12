@@ -1,0 +1,21 @@
+Performance = 2n³/time
+
+ver tempos(é suposto estar a subir)
+ver gráficos de Performance (suposto ser um reta)
+
+GO explicar o wtf, resarch you know (desistir caso falta de tempo)
+STENCIL, controla o máximo que vai para a cache, limitamos o quantidade de data que vai para cache
+
+n de blocos= n/block size
+for(int i=0; i< nº de blocos; i++)
+    Base de i= i*blocksize
+    for int j=0; j<nblocos; j++)
+    base de j = j*blocksize
+        for k=0 ; k< nblocos; k++)
+        base k =k*blocksize
+            for w=0 ; w< blocksize; w++)
+                for h=0 ; h< blocksize; h++)
+                temp=0;
+                    for q=0 ; q< blocksize; q++)
+                    temp+=A[iBase+W,jBase+q] * B(jBase+q,kBase+h)
+                C(iBase+W,kbase+l)+=temp;
