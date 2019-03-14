@@ -24,9 +24,6 @@ using namespace std;
 #define block_size_4 512
 #define block_size_5 1024
 
-
-
-
 int papi_config();
 void papi_start(int EventSet);
 void papi_reset(int EventSet, long long values[]);
@@ -83,7 +80,6 @@ double OnMult(int m_ar, int m_br)
 	}
 	cout << endl;
 
-
 	free(pha);
 	free(phb);
 	free(phc);
@@ -138,14 +134,15 @@ double OnMultLine(int m_ar)
 	fflush(stdout);
 
 	//Print Result matrix (c)
-	
+
 	cout << "Result matrix: " << endl;
-	for(i=0; i<1; i++)
-	{	for(j=0; j<min(10,m_ar); j++)
+	for (i = 0; i < 1; i++)
+	{
+		for (j = 0; j < min(10, m_ar); j++)
 			cout << phc[j] << " ";
 	}
 	cout << endl;
-	
+
 	//unallocate space of the matrices
 	free(pha);
 	free(phb);
@@ -187,50 +184,129 @@ double OnMultLine(int m_ar)
 			  << " REVISION: " << PAPI_VERSION_REVISION(retval) << "\n";
 }*/
 
-void runBenchmark(){
+double OnMultBlock(int m_ar, int m_br, int blockSize)
+{
+	SYSTEMTIME Time1, Time2;
+
+	char st[100];
+	double temp;
+	int i, j, k;
+
+	double *pha, *phb, *phc;
+
+	pha = (double *)malloc((m_ar * m_ar) * sizeof(double));
+	phb = (double *)malloc((m_ar * m_ar) * sizeof(double));
+	phc = (double *)malloc((m_ar * m_ar) * sizeof(double));
+
+	for (i = 0; i < m_ar; i++)
+		for (j = 0; j < m_ar; j++)
+			pha[i * m_ar + j] = (double)1.0;
+
+	for (i = 0; i < m_br; i++)
+		for (j = 0; j < m_br; j++)
+			phb[i * m_br + j] = (double)(i + 1);
+
+	Time1 = clock();
+	int nBlocks = m_ar / blockSize;
+	int iBase, jBase, kBase;
+
+	// ALGORITHM
+	for (int i = 0; i < nBlocks; i++)
+	{ // iterate blocks vertically
+		iBase = i * blockSize;
+		for (int j = 0; j < nBlocks; j++)
+		{ // iterate blocks horizontally
+			jBase = j * blockSize;
+			for (int k = 0; k < nBlocks; k++)
+			{
+				kBase = k * blockSize;
+				for (int w = 0; w < blockSize; w++)
+				{
+					for (int q = 0; q < blockSize; q++)
+					{
+						for (int e = 0; e < blockSize; e++)
+						{
+							phc[(iBase + w) * m_ar + kBase + e] += pha[(iBase + w) * m_ar + (jBase + q)] * phb[(jBase + q) * m_br + kBase + e];
+						}
+					}
+				}
+			}
+		}
+	}
+
+	Time2 = clock();
+	sprintf(st, "Time: %3.3f seconds\n",
+			(double)(Time2 - Time1) / CLOCKS_PER_SEC);
+	cout << st;
+
+	cout << "Result matrix: " << endl;
+	for (i = 0; i < 1; i++)
+	{
+		for (j = 0; j < min(10, m_br); j++)
+			cout << phc[j] << " ";
+
+		cout << endl;
+	}
+	cout << endl;
+
+	free(pha);
+	free(phb);
+	free(phc);
+
+	return (double)(Time2 - Time1) / CLOCKS_PER_SEC;
+}
+
+void runBenchmark()
+{
 
 	long long values[3];
 	std::ofstream myfile;
-    myfile.open ("Benchmark.csv");
-    myfile << "Algorithm, Run Number, Matrix size, Time, PAPI_L1_DCM, PAPI_L2_DCM,\n";
-    
+	myfile.open("Benchmark.csv");
+	myfile << "Algorithm, Run Number, Matrix size, Time, PAPI_L1_DCM, PAPI_L2_DCM,Blocksize,\n";
+
 	int EventSet = papi_config();
-		for(int j=start_1_2;j<=end_1_2; j+=increment_1_2)
-			for(int i=0; i<NUBMBER_OF_RUNS; i++){
-				papi_start(EventSet);
-				double time=OnMult(j,j);
-				papi_reset(EventSet,values);
-				myfile << "1," <<i <<"," << j<< "," <<time << "," << values[0]<< "," << values[1]<< ",\n";
-			}
+	for (int j = start_1_2; j <= end_1_2; j += increment_1_2)
+		for (int i = 0; i < NUBMBER_OF_RUNS; i++)
+		{
+			papi_start(EventSet);
+			double time = OnMult(j, j);
+			papi_reset(EventSet, values);
+			myfile << "1," << i << "," << j << "," << time << "," << values[0] << "," << values[1] << ",\n";
+		}
 
-		for(int j=start_1_2;j<=end_1_2; j+=increment_1_2)
-			for(int i=0; i<NUBMBER_OF_RUNS; i++){
-				papi_start(EventSet);
-				double time=OnMultLine(j);
-				papi_reset(EventSet,values);
-				myfile << "2," <<i <<"," << j<< "," <<time << "," << values[0]<< "," << values[1]<< ",\n";
-			}
+	for (int j = start_1_2; j <= end_1_2; j += increment_1_2)
+		for (int i = 0; i < NUBMBER_OF_RUNS; i++)
+		{
+			papi_start(EventSet);
+			double time = OnMultLine(j);
+			papi_reset(EventSet, values);
+			myfile << "2," << i << "," << j << "," << time << "," << values[0] << "," << values[1] << ",\n";
+		}
 
-		for(int j=start_2_3;j<=end_2_3; j+=increment_2_3)
-			for(int i=0; i<NUBMBER_OF_RUNS; i++){
-				papi_start(EventSet);
-				double time=OnMultLine(j);
-				papi_reset(EventSet,values);
-				myfile << "2," <<i <<"," << j<< "," <<time << "," << values[0]<< "," << values[1]<< ",\n";
-			}
+	for (int j = start_2_3; j <= end_2_3; j += increment_2_3)
+		for (int i = 0; i < NUBMBER_OF_RUNS; i++)
+		{
+			papi_start(EventSet);
+			double time = OnMultLine(j);
+			papi_reset(EventSet, values);
+			myfile << "2," << i << "," << j << "," << time << "," << values[0] << "," << values[1] << ",\n";
+		}
 
-		for(int j=start_2_3;j<=end_2_3; j+=increment_2_3)
-			for(int i=0; i<NUBMBER_OF_RUNS; i++){
+	for (int j = 2000; j <= 10000; j += increment_2_3)
+		for (int blocksize = 128; blocksize <= 512; blocksize += 64)
+			for (int i = 0; i < 3; i++)
+			{
 				papi_start(EventSet);
-				//TODO IMPLEMENT//double time=OnMultLine(j);
-				papi_reset(EventSet,values);
-				myfile << "3," <<i <<"," << j<< "," <<time << "," << values[0]<< "," << values[1]<< ",\n";
+				double time = OnMultBlock(j, j, blocksize);
+				papi_reset(EventSet, values);
+				myfile << "3," << i << "," << j << "," << time << "," << values[0] << "," << values[1] << "," << blocksize << ",\n";
 			}
-	papi_remove(EventSet);			
-	
+	papi_remove(EventSet);
 
-    myfile.close();
+	myfile.close();
 }
+
+
 
 int main(int argc, char *argv[])
 {
@@ -273,7 +349,7 @@ void consoleProgram()
 			break;
 		}
 
-		papi_reset(EventSet,values);
+		papi_reset(EventSet, values);
 
 	} while (op != 0);
 
