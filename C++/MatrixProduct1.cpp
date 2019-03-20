@@ -69,7 +69,7 @@ double OnMult(int m_ar, int m_br)
 	}
 
 	Time2 = clock();
-	sprintf(st, "Time: %3.3f seconds\n", (double)(Time2 - Time1) / CLOCKS_PER_SEC);
+	/*sprintf(st, "Time: %3.3f seconds\n", (double)(Time2 - Time1) / CLOCKS_PER_SEC);
 	cout << st;
 
 	cout << "Result matrix: " << endl;
@@ -78,7 +78,7 @@ double OnMult(int m_ar, int m_br)
 		for (j = 0; j < min(10, m_br); j++)
 			cout << phc[j] << " ";
 	}
-	cout << endl;
+	cout << endl;*/
 
 	free(pha);
 	free(phb);
@@ -102,12 +102,10 @@ double OnMultLine(int m_ar)
 	phb = (double *)malloc((m_ar * m_ar) * sizeof(double));
 	phc = (double *)malloc((m_ar * m_ar) * sizeof(double));
 
-	//Initialize values of matrix a
 	for (i = 0; i < m_ar; i++)
 		for (j = 0; j < m_ar; j++)
 			pha[i * m_ar + j] = (double)1.0;
 
-	//Initialize values of matrix b
 	for (i = 0; i < m_ar; i++)
 		for (j = 0; j < m_ar; j++)
 			phb[i * m_ar + j] = (double)(i + 1);
@@ -130,7 +128,7 @@ double OnMultLine(int m_ar)
 	Time2 = clock();
 
 	//Show results
-	printf("%3.3f ", (double)(Time2 - Time1) / CLOCKS_PER_SEC);
+	/*printf("%3.3f ", (double)(Time2 - Time1) / CLOCKS_PER_SEC);
 	fflush(stdout);
 
 	//Print Result matrix (c)
@@ -141,7 +139,7 @@ double OnMultLine(int m_ar)
 		for (j = 0; j < min(10, m_ar); j++)
 			cout << phc[j] << " ";
 	}
-	cout << endl;
+	cout << endl;*/
 
 	//unallocate space of the matrices
 	free(pha);
@@ -151,38 +149,6 @@ double OnMultLine(int m_ar)
 	return (double)(Time2 - Time1) / CLOCKS_PER_SEC;
 }
 
-/*float produtoInterno(float *v1, float *v2, int col)
-{
-	int i;
-	float soma = 0.0;
-
-	for (i = 0; i < col; i++)
-		soma += v1[i] * v2[i];
-
-	return (soma);
-}*/
-
-/*void handle_error(int retval)
-{
-	printf("PAPI error %d: %s\n", retval, PAPI_strerror(retval));
-	exit(1);
-}*/
-
-/*void init_papi()
-{
-	int retval = PAPI_library_init(PAPI_VER_CURRENT);
-	if (retval != PAPI_VER_CURRENT && retval < 0)
-	{
-		printf("PAPI library version mismatch!\n");
-		exit(1);
-	}
-	if (retval < 0)
-		handle_error(retval);
-
-	std::cout << "PAPI Version Number: MAJOR: " << PAPI_VERSION_MAJOR(retval)
-			  << " MINOR: " << PAPI_VERSION_MINOR(retval)
-			  << " REVISION: " << PAPI_VERSION_REVISION(retval) << "\n";
-}*/
 
 double OnMultBlock(int m_ar, int m_br, int blockSize)
 {
@@ -202,9 +168,9 @@ double OnMultBlock(int m_ar, int m_br, int blockSize)
 		for (j = 0; j < m_ar; j++)
 			pha[i * m_ar + j] = (double)1.0;
 
-	for (i = 0; i < m_br; i++)
-		for (j = 0; j < m_br; j++)
-			phb[i * m_br + j] = (double)(i + 1);
+	for (i = 0; i < m_ar; i++)
+		for (j = 0; j < m_ar; j++)
+			phb[i * m_ar + j] = (double)(i + 1);
 
 	Time1 = clock();
 	int nBlocks = m_ar / blockSize;
@@ -235,19 +201,19 @@ double OnMultBlock(int m_ar, int m_br, int blockSize)
 	}
 
 	Time2 = clock();
-	sprintf(st, "Time: %3.3f seconds\n",
+	/*sprintf(st, "Time: %3.3f seconds\n",
 			(double)(Time2 - Time1) / CLOCKS_PER_SEC);
 	cout << st;
 
 	cout << "Result matrix: " << endl;
 	for (i = 0; i < 1; i++)
 	{
-		for (j = 0; j < min(10, m_br); j++)
+		for (j = 0; j < min(10, m_br*m_ar); j++)
 			cout << phc[j] << " ";
 
 		cout << endl;
 	}
-	cout << endl;
+	cout << endl;*/
 
 	free(pha);
 	free(phb);
@@ -263,8 +229,11 @@ void runBenchmark()
 	std::ofstream myfile;
 	myfile.open("Benchmark.csv");
 	myfile << "Algorithm, Run Number, Matrix size, Time, PAPI_L1_DCM, PAPI_L2_DCM,Blocksize,\n";
+	cout << "Algorithm, Run Number, Matrix size, Time, PAPI_L1_DCM, PAPI_L2_DCM,Blocksize,\n";
 
+	
 	int EventSet = papi_config();
+	/*
 	for (int j = start_1_2; j <= end_1_2; j += increment_1_2)
 		for (int i = 0; i < NUBMBER_OF_RUNS; i++)
 		{
@@ -272,6 +241,7 @@ void runBenchmark()
 			double time = OnMult(j, j);
 			papi_reset(EventSet, values);
 			myfile << "1," << i << "," << j << "," << time << "," << values[0] << "," << values[1] << ",\n";
+			cout << "1," << i << "," << j << "," << time << "," << values[0] << "," << values[1] << ",\n";
 		}
 
 	for (int j = start_1_2; j <= end_1_2; j += increment_1_2)
@@ -281,6 +251,7 @@ void runBenchmark()
 			double time = OnMultLine(j);
 			papi_reset(EventSet, values);
 			myfile << "2," << i << "," << j << "," << time << "," << values[0] << "," << values[1] << ",\n";
+			cout << "2," << i << "," << j << "," << time << "," << values[0] << "," << values[1] << ",\n";
 		}
 
 	for (int j = start_2_3; j <= end_2_3; j += increment_2_3)
@@ -290,16 +261,18 @@ void runBenchmark()
 			double time = OnMultLine(j);
 			papi_reset(EventSet, values);
 			myfile << "2," << i << "," << j << "," << time << "," << values[0] << "," << values[1] << ",\n";
+			cout << "2," << i << "," << j << "," << time << "," << values[0] << "," << values[1] << ",\n";
 		}
-
-	for (int j = 2000; j <= 10000; j += increment_2_3)
-		for (int blocksize = 128; blocksize <= 512; blocksize += 64)
-			for (int i = 0; i < 3; i++)
+	*/
+	for (int j = 10000; j <= 10000; j += increment_2_3)
+		for (int blocksize = 256+64; blocksize <= 512; blocksize += 64)
+			for (int i = 3; i < 10; i++)
 			{
 				papi_start(EventSet);
 				double time = OnMultBlock(j, j, blocksize);
 				papi_reset(EventSet, values);
 				myfile << "3," << i << "," << j << "," << time << "," << values[0] << "," << values[1] << "," << blocksize << ",\n";
+				cout << "3," << i << "," << j << "," << time << "," << values[0] << "," << values[1] << "," << blocksize << ",\n";
 			}
 	papi_remove(EventSet);
 
@@ -310,6 +283,7 @@ void runBenchmark()
 
 int main(int argc, char *argv[])
 {
+
 	runBenchmark();
 	//consoleProgram();
 	return 0;
@@ -374,7 +348,7 @@ int papi_config()
 	if (ret != PAPI_OK)
 		cout << "ERRO: PAPI_L1_DCM" << endl;
 
-	ret = PAPI_add_event(EventSet, PAPI_L2_TCM);
+	ret = PAPI_add_event(EventSet, PAPI_L2_DCM);
 	if (ret != PAPI_OK)
 		cout << "ERRO: PAPI_L2_DCM" << endl;
 
@@ -396,8 +370,8 @@ void papi_reset(int EventSet, long long values[])
 	if (ret != PAPI_OK)
 		cout << "ERRO: Stop PAPI" << endl;
 
-	printf("L1 DCM: %lld \n", values[0]);
-	printf("L2 DCM: %lld \n", values[1]);
+	//printf("L1 DCM: %lld \n", values[0]);
+	//printf("L2 DCM: %lld \n", values[1]);
 
 	ret = PAPI_reset(EventSet);
 	if (ret != PAPI_OK)

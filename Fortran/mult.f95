@@ -98,4 +98,5 @@ end function
 
 program ex1
 	print *, OnMultLine(1000, 1000)
+	print *, OnMult(1000, 1000)
 end program ex1

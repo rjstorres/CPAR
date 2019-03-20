@@ -70,3 +70,4 @@ def onMultLine(lines, cols):
 
 
 onMultLine(300, 300)
+onMult(300,300)
