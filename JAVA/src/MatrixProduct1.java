@@ -112,8 +112,8 @@ public class MatrixProduct1 {
                     for (int w = 0; w < blockSize; w++) {
                         for (int q = 0; q < blockSize; q++) {
                             for (int e = 0; e < blockSize; e++) {
-                                c[(iBase + w) * n_a + kBase + e] += a[(iBase + w) * n_a + (jBase + q)]
-                                        * b[(jBase + q) * n_b + kBase + e];
+                                c[(iBase + w) * n_a + kBase + e] += a[(iBase + w) * n_a + (kBase + q)]
+                                        * b[(kBase + q) * n_b + jBase + e];
                             }
                         }
                     }

@@ -192,7 +192,8 @@ double OnMultBlock(int m_ar, int m_br, int blockSize)
 					{
 						for (int e = 0; e < blockSize; e++)
 						{
-							phc[(iBase + w) * m_ar + kBase + e] += pha[(iBase + w) * m_ar + (jBase + q)] * phb[(jBase + q) * m_br + kBase + e];
+							phc[(iBase + w) * m_ar + kBase + e] += 
+								pha[(iBase + w) * m_ar + (kBase + q)] * phb[(kBase + q) * m_ar + (jBase + e)];
 						}
 					}
 				}
