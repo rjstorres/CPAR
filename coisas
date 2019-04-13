@@ -3,7 +3,6 @@ Performance = 2n³/time
 ver tempos(é suposto estar a subir)
 ver gráficos de Performance (suposto ser um reta)
 
-GO explicar o wtf, resarch you know (desistir caso falta de tempo)
 STENCIL, controla o máximo que vai para a cache, limitamos o quantidade de data que vai para cache
 
 n de blocos= n/block size
